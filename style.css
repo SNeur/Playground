@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.pill {
+    background-color: rgba(30, 181, 58, 0.1);  
+    border-radius: 25px;
+    padding-top: 20px;
+}
+
+#chart, #boxPlotChart {
+    display: flex;
+    justify-content: flex-start; /* Align items to the left */
+    align-items: flex-start; /* Adjusts vertical alignment, if needed */
+    gap: 20px; /* Optional: space between elements */
+    margin-top: 20px;
+}
+
+.line {
+    fill: none;
+    stroke-width: 2;
+}
+
+footer p {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.active {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+#boxPlotChart {
+    display: flex;
+    gap: 20px;
+}
+
+.plot-title {
+    font-size: 14px;
+    text-anchor: middle;
+}

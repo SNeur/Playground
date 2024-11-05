@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASDAQ Stock and Possum Data Visualization</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container text-center my-4">
+        <!-- NASDAQ Visualization -->
+        <div class="row">
+            <div class="col">
+                <p>A line chart can help to visualize</p>
+                <h5 class="paragraphTitle">NASDAQ</h5>
+            </div>
+        </div>
+        <br>
+        <div class="row pill">
+            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                <button id="toggleButton" class="btn btn-primary mb-2">Show Open Price</button>
+            </div>
+            <div class="col-md-10">
+                <h5 id="priceSubtitle">Currently Showing: Open Price</h5>
+                <br>
+                <div id="chart"></div>
+            </div>
+        </div>
+
+        <br>
+        <br>
+        <br>
+
+        <!-- Possum Data Visualization -->
+        <div class="row">
+            <div class="col">
+                <h5 class="paragraphTitle">Distribution in Opposum Populations</h5>
+            </div>
+        </div>
+        <br>
+        <div class="row pill">
+            <div class="col-md-2">
+                <div id="filters">
+                    <h5>Sex</h5>
+                    <div id="sexButtons" class="filter-group"></div>
+                    <h5>Pop</h5>
+                    <div id="popButtons" class="filter-group"></div>
+                    <h5>Site</h5>
+                    <div id="siteButtons" class="filter-group"></div>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <h5 id="boxPlotTitle">Possum Data - Showing All Cases</h5>
+                <br>
+                <div id="boxPlotChart"></div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-4">
+            <p>&copy; <span id="currentYear"></span></p>
+        </footer>
+    </div>
+
+    <!-- Import D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Custom JS for the charts -->
+    <script src="script.js"></script>
+</body>
+</html>
