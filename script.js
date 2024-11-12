@@ -1,21 +1,46 @@
+// Reloads page on window resize
+window.addEventListener('resize', () => {
+    location.reload();
+});
+
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        location.reload();
+    }, 500); // Reloads after resizing has stopped for 500 ms
+});
+
+
+
 //test1
 document.addEventListener("DOMContentLoaded", () => {
-    const margin = { top: 20, right: 30, bottom: 50, left: 60 },
-    width = 800 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    // Select the Bootstrap column by its ID, class, or any other selector
+    const column = document.querySelector('.col-md-10'); // Adjust class as needed
 
+    // Get the current width in pixels
+    const columnWidth = column.offsetWidth; // Width in pixels
+    //console.log('Column width in pixels:', columnWidth);
+
+
+    let screendim = columnWidth*0.95; //(window.innerWidth>1000) ? 800 : window.innerWidth*0.7;
+    const margin = { top: 30, right: 20, bottom: 60, left: 50 },
+    width = screendim - margin.left - margin.right, 
+    height = 400 - margin.top - margin.bottom;
+    
+    //800 400
     // ----------------------
     // 1. STOCK LINE GRAPH
     // ----------------------
 
     const svg = d3.select("#chart")
                 .append("svg")
-                .attr("width", width + margin.left + margin.right)
+                .attr("width", width*1.1 + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const x = d3.scaleTime().range([0, width]);
+    const x = d3.scaleTime().range([0, width*1.1]);
     const y = d3.scaleLinear().range([height, 0]);
 
     // Initially set line to use "Open" price
@@ -53,7 +78,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .call(d3.axisLeft(y));
 
     // Increase font size of x-axis labels
-    svg.selectAll(".x-axis text").style("font-size", "14px");
+    svg.selectAll(".x-axis text")
+        .style("font-size", "14px")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
 
     // Increase font size of y-axis labels
     svg.selectAll(".y-axis text").style("font-size", "14px");
@@ -99,10 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------
     // 2. BOX PLOTS FOR POSSUM DATA
     // ----------------------
-
-    const plotWidth = 200 - margin.left - margin.right,
+    const boxmargin = {left:30, right:20}
+    const plotWidth = screendim/4 - boxmargin.left - boxmargin.right,
           plotHeight = 400 - margin.top - margin.bottom;
-
+    // 200 400
     // Container for boxplots
     const boxPlotContainer = d3.select("#boxPlotChart").append("div").attr("class", "d-flex flex-row justify-content-between");
 
@@ -173,10 +203,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (svg.empty()) {
                 svg = boxPlotContainer.append("svg")
                                       .attr("id", `box-plot-${variable.csvName}`)
-                                      .attr("width", plotWidth + margin.left + margin.right)
+                                      .attr("width", plotWidth + boxmargin.left + boxmargin.right)
                                       .attr("height", plotHeight + margin.top + margin.bottom)
                                       .append("g")
-                                      .attr("transform", `translate(${margin.left},${margin.top})`);
+                                      .attr("transform", `translate(${boxmargin.left},${margin.top})`);
                 
                 svg.append("text")
                    .attr("class", "plot-title")
@@ -201,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 yAxis.transition().duration(750).call(d3.axisLeft(y).ticks(5));
             }
-            yAxis.selectAll("text").style("font-size", "12px");
+            yAxis.selectAll("text").style("font-size", "14px");
         
             // Define a stable container for box plot elements
             let boxGroup = svg.select(".boxGroup");
@@ -246,4 +276,146 @@ document.addEventListener("DOMContentLoaded", () => {
 
         updateAllBoxPlots();
     }).catch(error => console.error("Error loading CSV data:", error));
+
+    // ----------------------
+    // 3. SCATTER PLOT FOR WINE
+    // ----------------------
+
+    const wine_svg = d3.select("#scatterplot")
+              .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Scales
+    const xScale = d3.scaleLinear().range([0, width]);
+    const yScale = d3.scaleLinear().range([height, 0]);
+
+    // Axes
+    const xAxis = wine_svg.append("g").attr("transform", `translate(0,${height})`);
+    const yAxis = wine_svg.append("g");
+
+    // Annotation for R-squared
+    const annotation = wine_svg.append("text")
+                        .attr("class", "annotation")
+                        .attr("x", width - 20)
+                        .attr("y", 20)
+                        .attr("text-anchor", "end");
+
+    // Plot title
+    const plotTitle = d3.select("#plotTitle");
+
+    // Dropdown event listener
+    d3.select("#xVariable").on("change", function() {
+        updatePlot(this.value);
+    });
+
+    // Load data and initialize plot
+    d3.csv("winequality.csv").then(data => {
+        data.forEach(d => {
+            d.quality = +d.quality;
+            d.residual_sugar = +d.residual_sugar;
+            d.alcohol = +d.alcohol;
+            d.sulphates = +d.sulphates;
+        });
+        
+        // Initial plot setup with "residual_sugar"
+        updatePlot("alcohol");
+    });
+
+    // Function to calculate linear regression
+    function calculateRegression(data, xKey, yKey) {
+        const xMean = d3.mean(data, d => d[xKey]);
+        const yMean = d3.mean(data, d => d[yKey]);
+        
+        const numerator = d3.sum(data, d => (d[xKey] - xMean) * (d[yKey] - yMean));
+        const denominator = d3.sum(data, d => Math.pow(d[xKey] - xMean, 2));
+        const slope = numerator / denominator;
+        const intercept = yMean - slope * xMean;
+        
+        const rSquaredNumerator = d3.sum(data, d => Math.pow((d[yKey] - (slope * d[xKey] + intercept)), 2));
+        const rSquaredDenominator = d3.sum(data, d => Math.pow(d[yKey] - yMean, 2));
+        const rSquared = 1 - (rSquaredNumerator / rSquaredDenominator);
+        
+        return { slope, intercept, rSquared };
+    }
+
+    // Update plot based on selected x variable
+    function updatePlot(xVariable) {
+        d3.csv("winequality.csv").then(data => {
+            data.forEach(d => {
+                d.quality = +d.quality;
+                d[xVariable] = +d[xVariable];
+            });
+            
+            // Set x and y scales based on data
+            xScale.domain(d3.extent(data, d => d[xVariable])).nice();
+            yScale.domain(d3.extent(data, d => d.quality)).nice();
+            
+            // Update axes
+            xAxis.transition().duration(500).call(d3.axisBottom(xScale));
+            yAxis.transition().duration(500).call(d3.axisLeft(yScale));
+
+            xAxis.selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)")
+            .style("font-size", "14px");
+            yAxis.selectAll("text").style("font-size", "14px");
+            
+            // Bind data to circles
+            const circles = wine_svg.selectAll("circle").data(data);
+            
+            // Enter selection
+            circles.enter()
+                .append("circle")
+                .attr("r", 4)
+                .attr("fill", "steelblue")
+                .merge(circles)
+                .transition()
+                .duration(500)
+                .attr("cx", d => xScale(d[xVariable]))
+                .attr("cy", d => yScale(d.quality));
+            
+            // Remove any excess circles
+            circles.exit().remove();
+            
+            // Update plot title
+            plotTitle.text(`X: ${xVariable[0].toUpperCase() + xVariable.replace("_", " ").slice(1)} vs Y: Quality`);
+            
+            // Calculate and plot regression line
+            const { slope, intercept, rSquared } = calculateRegression(data, xVariable, "quality");
+            
+            const regressionLine = [
+                { x: xScale.domain()[0], y: slope * xScale.domain()[0] + intercept },
+                { x: xScale.domain()[1], y: slope * xScale.domain()[1] + intercept }
+            ];
+            
+            const line = wine_svg.selectAll(".regression-line").data([regressionLine]);
+            
+            // Draw or update regression line
+            line.enter()
+                .append("line")
+                .attr("class", "regression-line")
+                .attr("stroke", "red")
+                .attr("stroke-width", 2)
+                .merge(line)
+                .transition()
+                .duration(500)
+                .attr("x1", xScale(regressionLine[0].x))
+                .attr("y1", yScale(regressionLine[0].y))
+                .attr("x2", xScale(regressionLine[1].x))
+                .attr("y2", yScale(regressionLine[1].y));
+            
+            line.exit().remove();
+            
+            // Update R-squared annotation
+            annotation.text(`R²: ${rSquared.toFixed(2)}`);
+        });
+    }
+
+
+
 });

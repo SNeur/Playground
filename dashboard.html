@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Analysis Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="https://www.rheindata.com" class="nav-item">Home</a>
+        <a href="index.html" class="nav-item">Index</a>
+        <a href="dashboard.html" class="nav-item">Dashboard</a>
+        <a href="#contact" class="nav-item">Contact</a>
+    </div>
+    <div class="dashboard-container">
+        <h1>Deaths on the Titanic</h1>
+
+        <div class="chart-container" id="sankey-chart">
+            <h3>Where Passengers Embarked</h3>
+            <div id="sankey"></div>
+        </div>
+        <div class="row">
+            <div class="chart-container col-md-6" id="histogram-chart">
+                <h3>Age vs Number of Deaths</h3>
+                <div id="histogram"></div>
+            </div>
+
+            <div class="chart-container col-md-6" id="bar-chart">
+                <h3>Deaths per Passenger Class</h3>
+                <div id="bar"></div>
+            </div>
+        </div>  
+
+        <br>
+        <footer class="text-center mt-4">
+            <p>&copy; <span id="currentYear"></span></p>
+        </footer>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
